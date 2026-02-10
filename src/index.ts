@@ -12,7 +12,7 @@ import { registerBillingCommands } from "./commands/billing/index.js";
 import { registerDomainCommands } from "./commands/domain/index.js";
 import { registerAuthCommands } from "./commands/auth/index.js";
 
-const DEFAULT_BASE_URL = "https://api.openclam.run";
+const DEFAULT_BASE_URL = "https://openclam.run";
 
 const program = new Command();
 

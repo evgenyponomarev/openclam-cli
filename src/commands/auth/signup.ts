@@ -4,7 +4,7 @@ import { existsSync, readFileSync, writeFileSync, appendFileSync } from "node:fs
 import { homedir } from "node:os";
 import { join, basename } from "node:path";
 
-const DEFAULT_BASE_URL = "https://api.openclam.run";
+const DEFAULT_BASE_URL = "https://openclam.run";
 
 /** Try to find an existing OPENCLAM_API_KEY from env or shell rc files */
 function findExistingKey(): string | null {
