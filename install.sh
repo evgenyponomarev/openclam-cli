@@ -20,7 +20,7 @@ NODE_MAJOR=$(node -p 'process.versions.node.split(".")[0]')
 # ── Resolve latest release ──────────────────────────────────────────────
 info "Fetching latest release from github.com/$REPO …"
 LATEST_TAG=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \
-  | grep '"tag_name"' | head -1 | sed -E 's/.*"tag_name":\s*"([^"]+)".*/\1/')
+  | grep -o '"tag_name": *"[^"]*"' | head -1 | cut -d'"' -f4)
 
 [ -n "$LATEST_TAG" ] || error "Could not determine latest release"
 info "Latest version: $LATEST_TAG"
