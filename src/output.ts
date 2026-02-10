@@ -40,15 +40,21 @@ export function error(err: CliError) {
 
 // ---- table (array of flat objects) ----
 
-export function table(rows: Record<string, unknown>[]) {
+export function table(rows: unknown[]) {
   if (rows.length === 0) {
     process.stdout.write("(no results)\n");
     return;
   }
 
-  const cols = Object.keys(rows[0]);
+  // If items are primitives (strings, numbers), just print one per line
+  if (typeof rows[0] !== "object" || rows[0] === null) {
+    for (const r of rows) process.stdout.write(String(r) + "\n");
+    return;
+  }
+
+  const cols = Object.keys(rows[0] as Record<string, unknown>);
   const widths = cols.map((c) => c.length);
-  const stringRows = rows.map((r) =>
+  const stringRows = (rows as Record<string, unknown>[]).map((r) =>
     cols.map((c, i) => {
       const s = formatCell(r[c]);
       if (s.length > widths[i]) widths[i] = s.length;

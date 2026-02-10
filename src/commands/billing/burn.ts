@@ -13,7 +13,7 @@ export function billingBurnCmd(parent: Command) {
       if (isJsonMode()) {
         success(data);
       } else {
-        const fmt = (micro: number) => `$${(micro / 1_000_000).toFixed(2)}`;
+        const fmt = (v: number) => `$${Number(v).toFixed(2)}`;
         if (data.instances.length === 0) {
           process.stdout.write("No billable instances.\n");
           return;
@@ -24,15 +24,15 @@ export function billingBurnCmd(parent: Command) {
           kind: i.kind,
           provider: i.provider,
           status: i.status,
-          cost_day: fmt(i.price_per_day_usdc_micro),
-          reserved: fmt(i.reserved_usdc_micro),
-          target: fmt(i.target_reserve_usdc_micro),
+          cost_day: fmt(i.price_per_day_usdc),
+          reserved: fmt(i.reserved_usdc),
+          target: fmt(i.target_reserve_usdc),
         }));
         table(rows);
         process.stdout.write(
-          `\nTotals:  burn/day ${fmt(data.totals.daily_burn_usdc_micro)}` +
-          `  reserved ${fmt(data.totals.reserved_usdc_micro)}` +
-          `  target ${fmt(data.totals.target_reserve_usdc_micro)}\n`,
+          `\nTotals:  burn/day ${fmt(data.totals.daily_burn_usdc)}` +
+          `  reserved ${fmt(data.totals.reserved_usdc)}` +
+          `  target ${fmt(data.totals.target_reserve_usdc)}\n`,
         );
       }
     });

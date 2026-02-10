@@ -19,7 +19,7 @@ export function gpuListCmd(parent: Command) {
           status: i.status,
           public_ip: i.public_ip ?? "-",
           domain: i.domain?.fqdn ?? "-",
-          price_day: formatUsdc(i.price_per_day_usdc_micro),
+          price_day: `$${Number(i.price_per_day_usdc).toFixed(2)}`,
           created: i.created_at,
         }));
         table(rows);
@@ -27,6 +27,3 @@ export function gpuListCmd(parent: Command) {
     });
 }
 
-function formatUsdc(micro: number): string {
-  return `$${(micro / 1_000_000).toFixed(2)}`;
-}

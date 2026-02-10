@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { clientFromProgram } from "../../index.js";
-import { success } from "../../output.js";
+import { success, isJsonMode } from "../../output.js";
+import { printInstance } from "../instanceFmt.js";
 import type { Instance } from "../../api/types.js";
 
 export function cpuCreateCmd(parent: Command) {
@@ -30,7 +31,12 @@ export function cpuCreateCmd(parent: Command) {
       if (opts.sshkey.length) body.ssh_keys = opts.sshkey;
       if (opts.port.length) body.ports = opts.port;
       const data = await client.post<Instance>("/v1/instances", body);
-      success(data);
+
+      if (isJsonMode()) {
+        success(data);
+      } else {
+        printInstance(data, "Instance created successfully");
+      }
     });
 }
 

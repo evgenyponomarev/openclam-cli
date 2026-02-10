@@ -22,9 +22,10 @@ export interface Offer {
   [key: string]: unknown;
 }
 
-export interface Estimate {
-  price_per_day_usdc_micro: number;
-  deposit_amount_usdc_micro?: number;
+export interface EstimateResponse {
+  price_per_day_usdc: number;
+  deposit_usdc: number;
+  deposit_epochs?: number;
   [key: string]: unknown;
 }
 
@@ -60,9 +61,9 @@ export interface Instance {
   status: string;
   public_ip: string | null;
   config: string;
-  price_per_day_usdc_micro: number;
-  reserved_usdc_micro: number;
-  target_reserve_usdc_micro: number;
+  price_per_day_usdc: number;
+  reserved_usdc: number;
+  target_reserve_usdc: number;
   billing_state: string;
   domain: DomainInfo | null;
   ports: string[];
@@ -74,13 +75,13 @@ export interface Instance {
 // ---- Billing ----
 
 export interface BillingStatus {
-  available_usdc_micro: number;
-  reserved_usdc_micro: number;
-  total_usdc_micro: number;
-  daily_burn_usdc_micro: number;
-  min_reserved_required_usdc_micro: number;
-  target_reserved_usdc_micro: number;
-  actual_reserved_usdc_micro: number;
+  available_usdc: number;
+  reserved_usdc: number;
+  total_usdc: number;
+  daily_burn_usdc: number;
+  min_reserved_required_usdc: number;
+  target_reserved_usdc: number;
+  actual_reserved_usdc: number;
   next_billing_time: string;
   next_epoch_id: string;
   runway_days: number | "infinite";
@@ -92,24 +93,24 @@ export interface BurnEntry {
   kind: string;
   provider: string;
   status: string;
-  price_per_day_usdc_micro: number;
-  reserved_usdc_micro: number;
-  target_reserve_usdc_micro: number;
+  price_per_day_usdc: number;
+  reserved_usdc: number;
+  target_reserve_usdc: number;
 }
 
 export interface BurnResponse {
   instances: BurnEntry[];
   totals: {
-    daily_burn_usdc_micro: number;
-    reserved_usdc_micro: number;
-    target_reserve_usdc_micro: number;
+    daily_burn_usdc: number;
+    reserved_usdc: number;
+    target_reserve_usdc: number;
   };
 }
 
 export interface BillingHistoryEntry {
   epoch_id: string;
   type: string;
-  amount_usdc_micro: number;
+  amount_usdc: number;
   created_at: string;
   [key: string]: unknown;
 }
@@ -122,16 +123,16 @@ export interface DepositAddress {
 export interface TopupResponse {
   ok?: boolean;
   status: string;
-  amount_usdc_micro?: number;
+  amount_usdc?: number;
   tx_hash?: string;
-  new_available_usdc_micro?: number;
+  new_available_usdc?: number;
   [key: string]: unknown;
 }
 
 export interface CheckResponse {
   ok: boolean;
   runway_days: number | "infinite";
-  underfunded_instances?: { instance_id: string; name: string; deficit_usdc_micro: number }[];
+  underfunded_instances?: { instance_id: string; name: string; deficit_usdc: number }[];
 }
 
 // ---- Domains ----

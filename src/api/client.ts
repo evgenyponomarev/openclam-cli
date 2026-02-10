@@ -108,17 +108,24 @@ export class OpenClamClient {
       return JSON.parse(text) as T;
     }
 
-    // Try to parse error body
-    let body: { code?: string; message?: string; details?: Record<string, unknown> } = {};
+    // Try to parse error body — backend sends { ok, error: { code, message, details } }
+    let errObj: { code?: string; message?: string; details?: Record<string, unknown> } = {};
     try {
-      body = (await res.json()) as typeof body;
+      const raw = (await res.json()) as Record<string, unknown>;
+      // Unwrap nested error object if present
+      const inner = (raw.error ?? raw) as typeof errObj;
+      errObj = {
+        code: inner.code ?? (raw.code as string),
+        message: inner.message ?? (raw.message as string),
+        details: inner.details ?? (raw.details as Record<string, unknown>),
+      };
     } catch {
       // ignore parse failures
     }
 
-    const code = body.code ?? "UNKNOWN";
-    const msg = body.message ?? res.statusText;
-    const details = body.details;
+    const code = errObj.code ?? "UNKNOWN";
+    const msg = errObj.message ?? res.statusText;
+    const details = errObj.details;
 
     switch (res.status) {
       case 401:
@@ -135,6 +142,8 @@ export class OpenClamClient {
       case 412:
         throw new CliError(code, msg, EXIT_PRECONDITION, details);
       case 422:
+        if (code === "INSUFFICIENT_FUNDS") throw insufficientFunds(msg, details);
+        if (code === "INSUFFICIENT_MINIMUM_BALANCE") throw insufficientReserve(msg, details);
         throw providerValidation(msg);
       case 429:
         throw new CliError("RATE_LIMITED", msg, EXIT_PRECONDITION);

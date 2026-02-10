@@ -20,7 +20,7 @@ export function cpuListCmd(parent: Command) {
           public_ip: i.public_ip ?? "-",
           domain: i.domain?.fqdn ?? "-",
           config: i.config,
-          price_day: formatUsdc(i.price_per_day_usdc_micro),
+          price_day: `$${Number(i.price_per_day_usdc).toFixed(2)}`,
           created: i.created_at,
         }));
         table(rows);
@@ -28,6 +28,3 @@ export function cpuListCmd(parent: Command) {
     });
 }
 
-function formatUsdc(micro: number): string {
-  return `$${(micro / 1_000_000).toFixed(2)}`;
-}
