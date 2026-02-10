@@ -1,0 +1,38 @@
+# .github/workflows/release.yml — put this in the PUBLIC CLI repo
+name: Release CLI
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+      - run: npm run build
+
+      # Package the built CLI into a tarball
+      - name: Package
+        run: |
+          mkdir -p release
+          # Include dist/, package.json, and node_modules for zero-install
+          cp -r dist package.json release/
+          cd release && npm install --omit=dev --ignore-scripts
+          cd ..
+          tar -czf openclam-cli-${{ github.ref_name }}.tar.gz -C release .
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: openclam-cli-*.tar.gz
+          generate_release_notes: true

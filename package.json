@@ -1,0 +1,37 @@
+{
+  "name": "openclam",
+  "version": "0.1.0",
+  "description": "OpenClam CLI — agent-native cloud for CPU/GPU instances",
+  "type": "module",
+  "bin": {
+    "openclam": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "openclam",
+    "cli",
+    "cloud",
+    "fluence",
+    "gpu",
+    "cpu"
+  ],
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@x402/core": "^2.3.0",
+    "@x402/evm": "^2.3.0",
+    "commander": "^12.1.0",
+    "viem": "^2.45.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
