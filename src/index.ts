@@ -10,6 +10,7 @@ import { registerGpuCommands } from "./commands/gpu/index.js";
 import { registerSshKeyCommands } from "./commands/sshkey/index.js";
 import { registerBillingCommands } from "./commands/billing/index.js";
 import { registerDomainCommands } from "./commands/domain/index.js";
+import { registerAuthCommands } from "./commands/auth/index.js";
 
 const DEFAULT_BASE_URL = "https://api.openclam.run";
 
@@ -38,6 +39,7 @@ export function clientFromProgram(cmd: Command): OpenClamClient {
 }
 
 // Register sub-command groups
+registerAuthCommands(program);
 registerCpuCommands(program);
 registerGpuCommands(program);
 registerSshKeyCommands(program);
