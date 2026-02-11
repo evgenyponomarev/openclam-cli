@@ -16,6 +16,9 @@ export function printInstance(data: Instance, title?: string) {
   if (data.domain) {
     w(`  Domain:    ${data.domain.fqdn} (${data.domain.status})\n`);
   }
+  if (data.public_ip) {
+    w(`  SSH:       ssh root@${data.public_ip}\n`);
+  }
   w(`  Cost:      $${Number(data.price_per_day_usdc).toFixed(2)}/day\n`);
   w(`  Reserved:  $${Number(data.reserved_usdc).toFixed(2)}\n`);
   w(`  Billing:   ${data.billing_state}\n`);

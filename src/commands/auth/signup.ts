@@ -4,13 +4,41 @@ import { existsSync, readFileSync, writeFileSync, appendFileSync } from "node:fs
 import { homedir } from "node:os";
 import { join, basename } from "node:path";
 
-const DEFAULT_BASE_URL = "https://openclam.run";
+const DEFAULT_BASE_URL = "https://www.openclam.run";
+
+const ALL_RC_FILES = [".bash_profile", ".bashrc", ".zshrc", ".zprofile", ".profile"];
+
+/** Detect which shell the user is running */
+function currentShell(): string {
+  const sh = process.env.SHELL || "";
+  if (sh.includes("zsh")) return "zsh";
+  return "bash";
+}
+
+/** Get the rc files relevant to the current shell, creating one if none exist */
+function getTargetRcFiles(): string[] {
+  const home = homedir();
+  const shell = currentShell();
+
+  // Preferred file per shell (macOS bash uses .bash_profile for login shells)
+  const preferred = shell === "zsh" ? ".zshrc" : ".bash_profile";
+  const existing = ALL_RC_FILES
+    .map((f) => join(home, f))
+    .filter((f) => existsSync(f));
+
+  if (existing.length > 0) return existing;
+
+  // No rc files exist — create the preferred one
+  const target = join(home, preferred);
+  writeFileSync(target, "");
+  return [target];
+}
 
 /** Try to find an existing OPENCLAM_API_KEY from env or shell rc files */
 function findExistingKey(): string | null {
   if (process.env.OPENCLAM_API_KEY) return process.env.OPENCLAM_API_KEY;
   const home = homedir();
-  for (const rc of [".zshrc", ".bashrc", ".profile"]) {
+  for (const rc of ALL_RC_FILES) {
     const p = join(home, rc);
     if (!existsSync(p)) continue;
     const match = readFileSync(p, "utf-8").match(/export OPENCLAM_API_KEY=(\S+)/);
@@ -20,11 +48,8 @@ function findExistingKey(): string | null {
 }
 
 function saveKeyToRc(apiKey: string): string[] {
-  const home = homedir();
   const exportLine = `export OPENCLAM_API_KEY=${apiKey}`;
-  const rcFiles = [".bashrc", ".zshrc", ".profile"]
-    .map((f) => join(home, f))
-    .filter((f) => existsSync(f));
+  const rcFiles = getTargetRcFiles();
 
   for (const rc of rcFiles) {
     const content = readFileSync(rc, "utf-8");
@@ -118,8 +143,9 @@ export function registerSignupCommand(parent: Command) {
       w(`  Deposit Address:  ${data.deposit_address}\n`);
       w("\n");
       if (rcFiles.length > 0) {
-        w(`  API key saved to ${rcFiles.map((f) => "~/" + basename(f)).join(", ")}\n`);
-        w("  Run: source ~/.bashrc  (or restart your terminal)\n");
+        const rcNames = rcFiles.map((f) => "~/" + basename(f));
+        w(`  API key saved to ${rcNames.join(", ")}\n`);
+        w(`  Run: source ${rcNames[0]}  (or restart your terminal)\n`);
       } else {
         w(`  Run: export OPENCLAM_API_KEY=${data.api_key}\n`);
       }
