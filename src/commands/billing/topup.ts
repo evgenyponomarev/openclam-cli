@@ -21,58 +21,22 @@ export function billingTopupCmd(parent: Command) {
       const walletKey =
         process.env.OPENCLAM_WALLET_KEY ?? process.env.WALLET_PRIVATE_KEY ?? "";
 
-      // ── Agent path: automatic x402 payment ──
-      if (walletKey) {
-        await automaticTopup(client, amount, walletKey);
-        return;
+      if (!walletKey) {
+        const w = (s: string) => process.stdout.write(s);
+        w("\n");
+        w("  Automatic payment requires a wallet private key.\n");
+        w("  Set it and re-run:\n");
+        w("\n");
+        w("    export OPENCLAM_WALLET_KEY=0x<private-key-with-base-usdc>\n");
+        w(`    openclam billing topup --usdc ${amount}\n`);
+        w("\n");
+        w("  The wallet needs USDC on Base (Coinbase L2).\n");
+        w("\n");
+        process.exit(1);
       }
 
-      // ── Human path: show deposit address ──
-      await manualTopup(client, amount);
+      await automaticTopup(client, amount, walletKey);
     });
-}
-
-async function manualTopup(
-  client: ReturnType<typeof clientFromProgram>,
-  amount: number,
-) {
-  // Fetch deposit address from billing status
-  const status = (await client.get("/v1/billing/status")) as {
-    deposit_address?: string;
-    available_usdc: number;
-  };
-
-  if (!status.deposit_address) {
-    throw paymentFailed("No deposit address found. Run: openclam auth signup");
-  }
-
-  if (isJsonMode()) {
-    success({
-      status: "awaiting_deposit",
-      deposit_address: status.deposit_address,
-      network: "Base (EIP-155:8453)",
-      asset: "USDC",
-      amount_usdc: amount,
-      message: `Send ${amount} USDC on Base to ${status.deposit_address}`,
-    });
-    return;
-  }
-
-  const w = (s: string) => process.stdout.write(s);
-  w("\n");
-  w("  Send USDC to your deposit address\n");
-  w("  ──────────────────────────────────────\n");
-  w(`  Amount:   ${amount} USDC\n`);
-  w(`  Network:  Base (Coinbase L2)\n`);
-  w(`  Asset:    USDC\n`);
-  w(`  Address:  ${status.deposit_address}\n`);
-  w("\n");
-  w("  Your balance will update once the transfer confirms.\n");
-  w(`  Current balance: $${Number(status.available_usdc).toFixed(2)} USDC\n`);
-  w("\n");
-  w("  For automatic payments (AI agents):\n");
-  w("    export OPENCLAM_WALLET_KEY=0x<private-key-with-base-usdc>\n");
-  w("\n");
 }
 
 async function automaticTopup(

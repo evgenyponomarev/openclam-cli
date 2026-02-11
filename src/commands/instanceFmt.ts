@@ -10,6 +10,9 @@ export function printInstance(data: Instance, title?: string) {
   w(`  ID:        ${data.id}\n`);
   w(`  Name:      ${data.name}\n`);
   w(`  Kind:      ${data.kind}\n`);
+  if (data.config) {
+    w(`  Config:    ${data.config}\n`);
+  }
   w(`  Status:    ${data.status}\n`);
   w(`  Provider:  ${data.provider}\n`);
   w(`  IP:        ${data.public_ip ?? "pending..."}\n`);

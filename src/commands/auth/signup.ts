@@ -84,8 +84,7 @@ export function registerSignupCommand(parent: Command) {
             available_usdc: number;
             reserved_usdc: number;
             daily_burn_usdc: number;
-            active_instance_count: number;
-            deposit_address?: string;
+            runway_days: number | "infinite";
           };
 
           if (isJsonMode()) {
@@ -99,7 +98,8 @@ export function registerSignupCommand(parent: Command) {
           w(`  API Key:      ${existingKey.slice(0, 12)}...${existingKey.slice(-6)}\n`);
           w(`  Available:    $${Number(status.available_usdc).toFixed(2)} USDC\n`);
           w(`  Reserved:     $${Number(status.reserved_usdc).toFixed(2)} USDC\n`);
-          w(`  Instances:    ${status.active_instance_count}\n`);
+          w(`  Daily burn:   $${Number(status.daily_burn_usdc).toFixed(2)} USDC\n`);
+          w(`  Runway:       ${status.runway_days === "infinite" ? "∞" : `${status.runway_days} days`}\n`);
           w("\n");
           w("  To create a new account instead: openclam auth signup --force\n");
           w("\n");
@@ -138,9 +138,8 @@ export function registerSignupCommand(parent: Command) {
       w("\n");
       w("  Account created successfully\n");
       w("  ──────────────────────────────\n");
-      w(`  Account ID:       ${data.account_id}\n`);
-      w(`  API Key:          ${data.api_key}\n`);
-      w(`  Deposit Address:  ${data.deposit_address}\n`);
+      w(`  Account ID:  ${data.account_id}\n`);
+      w(`  API Key:     ${data.api_key}\n`);
       w("\n");
       if (rcFiles.length > 0) {
         const rcNames = rcFiles.map((f) => "~/" + basename(f));
