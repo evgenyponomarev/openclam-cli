@@ -19,7 +19,7 @@ export function gpuListCmd(parent: Command) {
           status: i.status,
           public_ip: i.public_ip ?? "-",
           domain: i.domain?.fqdn ?? "-",
-          price_day: `$${Number(i.price_per_day_usdc).toFixed(2)}`,
+          "$/hr": `$${(Number(i.price_per_day_usdc) / 24).toFixed(2)}`,
           created: i.created_at,
         }));
         table(rows);

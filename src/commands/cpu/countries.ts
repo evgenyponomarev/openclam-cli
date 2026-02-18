@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import { clientFromProgram } from "../../index.js";
-import { success } from "../../output.js";
-import type { Country } from "../../api/types.js";
+import { success, isJsonMode, table } from "../../output.js";
 
 export function cpuCountriesCmd(parent: Command) {
   const cmd = parent
@@ -13,7 +12,16 @@ export function cpuCountriesCmd(parent: Command) {
     .description("List available countries for CPU instances")
     .action(async function (this: Command) {
       const client = clientFromProgram(this);
-      const data = await client.get<Country[]>("/v1/cpu/countries");
-      success(data);
+      const data = await client.get<string[]>("/v1/cpu/countries");
+      if (isJsonMode()) {
+        success(data);
+      } else {
+        if (data.length === 0) {
+          process.stdout.write("No countries available.\n");
+          return;
+        }
+        const rows = data.map((code) => ({ country: String(code) }));
+        table(rows);
+      }
     });
 }

@@ -1,27 +1,47 @@
 import { Command } from "commander";
 import { clientFromProgram } from "../../index.js";
-import { success } from "../../output.js";
-import type { Offer } from "../../api/types.js";
+import { success, isJsonMode, table } from "../../output.js";
 
 export function gpuOffersCmd(parent: Command) {
   const cmd = parent
     .command("offers")
-    .description("GPU offer discovery");
+    .description("GPU plan discovery");
 
   cmd
     .command("list")
-    .description("List available GPU offers")
-    .option("--gpu-model <model>", "filter by GPU model")
-    .option("--min-vram <gb>", "minimum VRAM in GB")
-    .option("--max-price <usdc>", "max price per day in USDC")
+    .description("List available GPU plans (containers, VMs, bare metal)")
     .action(async function (this: Command) {
-      const opts = this.opts();
       const client = clientFromProgram(this);
-      const body: Record<string, unknown> = {};
-      if (opts.gpuModel) body.gpu_model = opts.gpuModel;
-      if (opts.minVram) body.min_vram_gb = Number(opts.minVram);
-      if (opts.maxPrice) body.max_price = Number(opts.maxPrice);
-      const data = await client.post<Offer[]>("/v1/gpu/offers", body);
-      success(data);
+      const data = await client.get<Record<string, unknown>[]>("/v1/gpu/offers");
+      if (isJsonMode()) {
+        success(data);
+        return;
+      }
+      const rows = data.map((entry) => {
+        const plan = (entry.plan ?? entry) as Record<string, unknown>;
+        const supply = plan.supply as Record<string, unknown> | undefined;
+        const gpu = plan.gpu_model as Record<string, unknown> | undefined;
+        const pricing = plan.pricing as Record<string, unknown> | undefined;
+        const attrs = entry.attributes as Record<string, unknown> | undefined;
+        const vcpu = (supply?.vcpu as Record<string, unknown>)?.count ?? "-";
+        const gpuCount = supply?.gpu_count ?? 1;
+        const mem = supply?.memory as Record<string, unknown> | undefined;
+        const stor = supply?.storage as Record<string, unknown> | undefined;
+        const locs = attrs?.location;
+        const location = Array.isArray(locs) ? (locs as string[]).join(",") : String(locs ?? "-");
+        const type = String(entry._type ?? "container");
+        return {
+          plan_id: plan.id ?? "-",
+          type,
+          gpu: `${gpu?.model ?? "?"}  ${gpu?.vram ?? ""}`,
+          gpus: gpuCount,
+          vcpu,
+          ram: mem ? `${mem.count}${mem.units}` : "-",
+          disk: stor ? `${stor.count}${stor.units}` : "-",
+          "$/hr": pricing?.hour != null ? `$${Number(pricing.hour).toFixed(2)}` : "-",
+          location,
+        };
+      });
+      table(rows);
     });
 }

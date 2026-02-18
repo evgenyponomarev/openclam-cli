@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { clientFromProgram } from "../../index.js";
-import { success } from "../../output.js";
+import { success, isJsonMode } from "../../output.js";
+import { printInstance } from "../instanceFmt.js";
 import type { Instance } from "../../api/types.js";
 
 export function cpuRenameCmd(parent: Command) {
@@ -14,6 +15,10 @@ export function cpuRenameCmd(parent: Command) {
       const data = await client.patch<Instance>(`/v1/instances/${instanceId}`, {
         name: opts.name,
       });
-      success(data);
+      if (isJsonMode()) {
+        success(data);
+      } else {
+        printInstance(data, "Instance renamed");
+      }
     });
 }

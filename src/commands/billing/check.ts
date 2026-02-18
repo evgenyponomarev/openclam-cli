@@ -29,6 +29,11 @@ export function billingCheckCmd(parent: Command) {
         );
       }
 
-      success(data);
+      if (isJsonMode()) {
+        success(data);
+      } else {
+        const runway = data.runway_days === "infinite" ? "infinite" : `${data.runway_days} days`;
+        process.stdout.write(`Billing OK — runway: ${runway}\n`);
+      }
     });
 }

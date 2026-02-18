@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { clientFromProgram } from "../../index.js";
-import { success } from "../../output.js";
+import { success, isJsonMode } from "../../output.js";
+import { printInstance } from "../instanceFmt.js";
 import { timeoutError } from "../../errors.js";
 import type { Instance } from "../../api/types.js";
 
@@ -21,7 +22,11 @@ export function gpuWaitCmd(parent: Command) {
       while (true) {
         const data = await client.get<Instance>(`/v1/instances/${instanceId}`);
         if (data.status.toLowerCase() === target) {
-          success(data);
+          if (isJsonMode()) {
+            success(data);
+          } else {
+            printInstance(data);
+          }
           return;
         }
         if (Date.now() - start > timeoutMs) {

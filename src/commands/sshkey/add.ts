@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { clientFromProgram } from "../../index.js";
-import { success } from "../../output.js";
+import { success, isJsonMode } from "../../output.js";
 import { CliError } from "../../errors.js";
 import { EXIT_USAGE } from "../../exitCodes.js";
 import type { SshKey } from "../../api/types.js";
@@ -17,7 +17,6 @@ export function sshKeyAddCmd(parent: Command) {
       const client = clientFromProgram(this);
 
       let pubkey: string = opts.pubkey;
-      // If it looks like a file path (contains / or ends with .pub), read it
       if (looksLikeFile(pubkey)) {
         try {
           pubkey = fs.readFileSync(pubkey, "utf-8").trim();
@@ -34,7 +33,18 @@ export function sshKeyAddCmd(parent: Command) {
         name: opts.name,
         public_key: pubkey,
       });
-      success(data);
+      if (isJsonMode()) {
+        success(data);
+      } else {
+        const w = (s: string) => process.stdout.write(s);
+        w("\n  SSH key added\n");
+        w("  ─────────────\n");
+        w(`  ID:           ${data.id}\n`);
+        w(`  Name:         ${data.name}\n`);
+        if (data.fingerprint) w(`  Fingerprint:  ${data.fingerprint}\n`);
+        w(`  Created:      ${data.created_at}\n`);
+        w("\n");
+      }
     });
 }
 

@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import { clientFromProgram } from "../../index.js";
-import { success } from "../../output.js";
+import { success, isJsonMode, table } from "../../output.js";
 import type { Image } from "../../api/types.js";
 
 export function cpuImagesCmd(parent: Command) {
@@ -14,6 +14,18 @@ export function cpuImagesCmd(parent: Command) {
     .action(async function (this: Command) {
       const client = clientFromProgram(this);
       const data = await client.get<Image[]>("/v1/cpu/images");
-      success(data);
+      if (isJsonMode()) {
+        success(data);
+      } else {
+        if (data.length === 0) {
+          process.stdout.write("No images available.\n");
+          return;
+        }
+        const rows = data.map((i) => ({
+          slug: i.slug,
+          name: i.name,
+        }));
+        table(rows);
+      }
     });
 }

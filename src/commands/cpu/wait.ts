@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { clientFromProgram } from "../../index.js";
-import { success } from "../../output.js";
+import { success, isJsonMode } from "../../output.js";
+import { printInstance } from "../instanceFmt.js";
 import { timeoutError } from "../../errors.js";
 import type { Instance } from "../../api/types.js";
 
@@ -21,7 +22,11 @@ export function cpuWaitCmd(parent: Command) {
       while (true) {
         const data = await client.get<Instance>(`/v1/instances/${instanceId}`);
         if (data.status.toLowerCase() === target) {
-          success(data);
+          if (isJsonMode()) {
+            success(data);
+          } else {
+            printInstance(data);
+          }
           return;
         }
         if (Date.now() - start > timeoutMs) {
@@ -36,7 +41,7 @@ export function cpuWaitCmd(parent: Command) {
 
 function parseDuration(s: string): number {
   const match = s.match(/^(\d+)(s|m|h)$/);
-  if (!match) return 600_000; // default 10m
+  if (!match) return 600_000;
   const n = parseInt(match[1], 10);
   switch (match[2]) {
     case "s": return n * 1000;
