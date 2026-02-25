@@ -20,7 +20,8 @@ export function printInstance(data: Instance, title?: string) {
     w(`  Domain:    ${data.domain.fqdn} (${data.domain.status})\n`);
   }
   if (data.public_ip) {
-    w(`  SSH:       ssh root@${data.public_ip}\n`);
+    w(`  SSH:       ssh ubuntu@${data.public_ip}\n`);
+    w(`             (no password needed — uses your registered SSH key)\n`);
   }
   if (data.kind === "gpu") {
     w(`  Cost:      $${(Number(data.price_per_day_usdc) / 24).toFixed(2)}/hr\n`);
